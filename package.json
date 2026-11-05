@@ -1,0 +1,13 @@
+{
+  "name": "countdown",
+  "private": true,
+  "description": "Countdown-Web-App – statische Seite, kein Build nötig.",
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 8080 .",
+    "test": "TZ=Europe/Berlin node --test tests/*.test.cjs",
+    "test:e2e": "TZ=Europe/Berlin node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

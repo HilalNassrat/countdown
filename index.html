@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Countdown</title>
+<meta name="description" content="Schöne Countdowns für deine wichtigen Termine. Läuft komplett im Browser.">
+<meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23E5753F'/%3E%3Cpath d='M16 8v8l5 3' stroke='%23fff' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ec;--panel:#ffffff;--ink:#1d1b17;--muted:#716c62;--faint:#a5a094;--line:#e7e2d7;--soft:#efeae0;
+  --accent:#e5753f;--accent-h:#d2642f;--accent-ink:#fff;--accent-soft:#fbe9dd;--accent-deep:#b8562a;
+  --shadow-sm:0 1px 2px rgba(29,27,23,.05);
+  --shadow-md:0 1px 2px rgba(29,27,23,.05),0 10px 30px rgba(29,27,23,.08);
+  --shadow-lg:0 2px 4px rgba(29,27,23,.06),0 30px 70px rgba(29,27,23,.16);
+  --r:16px;--r-sm:10px;
+  --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.4,.64,1);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#141311;--panel:#1d1b18;--ink:#f3f0e8;--muted:#a39d91;--faint:#6f6a60;--line:#2d2a25;--soft:#26231f;
+  --accent:#ef8a55;--accent-h:#f69b6b;--accent-ink:#1a0f08;--accent-soft:#3a2418;--accent-deep:#f4a97f;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.35);
+  --shadow-md:0 1px 2px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 2px 4px rgba(0,0,0,.4),0 30px 70px rgba(0,0,0,.55);
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100%}
+body{padding:0 20px calc(40px + env(safe-area-inset-bottom))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.wrap{max-width:1040px;margin:0 auto}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 8px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.now{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+
+/* Hero (nearest) */
+.hero{margin:28px 0 24px;padding:44px 40px 40px;background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-md);position:relative;overflow:hidden;
+  animation:rise .7s var(--ease) both}
+.hero::before{content:"";position:absolute;inset:-40% -20% auto auto;width:60%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(closest-side,var(--accent-soft),transparent 70%);opacity:.9;pointer-events:none}
+.hero .label{font-size:13px;font-weight:600;color:var(--accent-deep);letter-spacing:.04em;text-transform:uppercase}
+.hero h1{margin:6px 0 22px;font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.hero .meta{color:var(--muted);font-size:14px;margin-top:18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.digits{display:flex;gap:clamp(10px,3vw,28px);flex-wrap:wrap}
+.unit{min-width:clamp(64px,13vw,120px)}
+.unit b{display:block;font-size:clamp(44px,9vw,88px);font-weight:800;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+.unit span{display:block;margin-top:8px;color:var(--muted);font-size:13px;font-weight:500}
+.unit b .flip{display:inline-block;animation:flip .4s var(--spring)}
+@keyframes flip{from{transform:translateY(-.25em);opacity:0}to{transform:none;opacity:1}}
+.bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden;margin-top:26px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transform-origin:left;transition:transform 1s linear}
+.hero.done .label{color:var(--muted)}
+.hero.empty{text-align:center;padding:64px 24px}
+.hero.empty h1{font-size:28px}
+.hero.empty p{color:var(--muted);max-width:420px;margin:0 auto 22px}
+
+/* Toolbar */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin:10px 0 14px;gap:12px}
+.toolbar h2{margin:0;font-size:15px;font-weight:700;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;font-weight:700;font-size:14px;
+  transition:transform .18s var(--spring),background .18s,box-shadow .18s,color .18s}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 1px 2px rgba(0,0,0,.08),0 6px 16px -6px var(--accent)}
+.btn.primary:hover{background:var(--accent-h);transform:translateY(-1px)}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+.btn.ghost:hover{background:var(--line)}
+.btn.danger{color:#c8372f}
+.btn svg{width:18px;height:18px}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 20px;box-shadow:var(--shadow-sm);position:relative;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s;animation:rise .6s var(--ease) both;animation-delay:var(--d,0s)}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:transparent}
+.card h3{margin:0 0 2px;font-size:17px;font-weight:700;letter-spacing:-.01em;padding-right:36px}
+.card .date{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.card .big{margin:18px 0 2px;font-size:46px;font-weight:800;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.card .big small{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:6px}
+.card .sub{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.card .bar{margin-top:16px;height:4px}
+.card.past .big{color:var(--muted)}
+.card .menu{position:absolute;top:14px;right:14px;display:flex;gap:2px;opacity:0;transform:translateY(-2px);transition:opacity .2s,transform .2s var(--ease)}
+.card:hover .menu,.card:focus-within .menu{opacity:1;transform:none}
+@media(hover:none){.card .menu{opacity:1;transform:none}}
+.icon{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--muted);transition:background .15s,color .15s,transform .15s var(--spring)}
+.icon:hover{background:var(--soft);color:var(--ink)}
+.icon:active{transform:scale(.9)}
+.icon svg{width:16px;height:16px}
+
+/* Dialog */
+dialog{border:0;padding:0;background:transparent;max-width:none;width:100%;height:100%;max-height:none;margin:0}
+dialog::backdrop{background:rgba(20,18,14,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:fade .25s both}
+dialog[open]{display:grid;place-items:center;padding:16px}
+.sheet{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:var(--shadow-lg);
+  animation:pop .45s var(--spring) both}
+.sheet h2{margin:0 0 18px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.02em}
+.field input{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);outline:0;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 16px}
+.chip{padding:6px 12px;border-radius:99px;background:var(--soft);font-size:12.5px;font-weight:600;color:var(--muted);transition:all .15s}
+.chip:hover{background:var(--accent-soft);color:var(--accent-deep)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;
+  box-shadow:var(--shadow-lg);transition:transform .4s var(--spring),opacity .3s;pointer-events:none;z-index:9}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+footer{margin-top:48px;text-align:center;color:var(--faint);font-size:12.5px}
+footer a{color:inherit}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:600px){.hero{padding:30px 22px 26px;border-radius:20px}.row{grid-template-columns:1fr}body{padding:0 14px 40px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span>Countdown</div>
+    <div class="now" id="now"></div>
+  </header>
+
+  <section class="hero" id="hero"></section>
+
+  <div class="toolbar">
+    <h2 id="count"></h2>
+    <button class="btn primary" id="add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Neuer Countdown
+    </button>
+  </div>
+
+  <section class="grid" id="grid"></section>
+
+  <footer>Alles bleibt in diesem Browser gespeichert. Teilen per Link kopiert nur den einzelnen Countdown.</footer>
+</div>
+
+<dialog id="dlg">
+  <form class="sheet" id="form" method="dialog">
+    <h2 id="dlgTitle">Neuer Countdown</h2>
+    <div class="field"><label for="fName">Was zählst du runter?</label><input id="fName" placeholder="z. B. Ramadan, Abgabe, Flug nach Jakarta" required maxlength="60" autocomplete="off"></div>
+    <div class="quick" id="quick"></div>
+    <div class="row">
+      <div class="field"><label for="fDate">Datum</label><input id="fDate" type="date" required></div>
+      <div class="field"><label for="fTime">Uhrzeit</label><input id="fTime" type="time" value="00:00"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="cancel">Abbrechen</button>
+      <button type="submit" class="btn primary" id="save">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='countdowns.v1';
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const fmtDate=d=>d.toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'long',year:'numeric'})+(d.getHours()||d.getMinutes()?' · '+pad(d.getHours())+':'+pad(d.getMinutes()):'');
+let items=load();
+
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(items))}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function parts(ms){const s=Math.max(0,Math.floor(ms/1000));return{d:Math.floor(s/86400),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60),s:s%60}}
+function sorted(){const now=Date.now();return[...items].sort((a,b)=>{const pa=a.at<now,pb=b.at<now;if(pa!==pb)return pa-pb;return pa?b.at-a.at:a.at-b.at})}
+function progress(it){const span=it.at-it.created;if(span<=0)return 1;return Math.min(1,Math.max(0,(Date.now()-it.created)/span))}
+
+// Shared link ?add=name|timestamp
+(function(){const p=new URLSearchParams(location.search);const a=p.get('add');if(!a)return;const [name,at]=a.split('|');
+  if(name&&+at){items.push({id:uid(),name:decodeURIComponent(name),at:+at,created:Date.now()});persist();history.replaceState(null,'',location.pathname);toast('Countdown übernommen')}})();
+
+function render(){
+  const list=sorted();
+  $('#count').textContent=list.length?`${list.length} Countdown${list.length>1?'s':''}`:'';
+  const hero=$('#hero');
+  const next=list.find(i=>i.at>Date.now());
+  if(!list.length){hero.className='hero empty';hero.innerHTML=`<h1>Noch nichts, worauf du wartest</h1><p>Leg einen Countdown an – für den nächsten Flug, eine Abgabe oder den Tag, an dem etwas Neues beginnt.</p><button class="btn primary" onclick="openDlg()">Ersten Countdown anlegen</button>`}
+  else if(!next){const last=list[0];hero.className='hero done';hero.dataset.id=last.id;hero.innerHTML=`<div class="label">Vorbei</div><h1>${esc(last.name)}</h1><div class="meta">${fmtDate(new Date(last.at))}</div>`}
+  else{hero.className='hero';hero.dataset.id=next.id;hero.innerHTML=`<div class="label">Als Nächstes</div><h1>${esc(next.name)}</h1>
+    <div class="digits">${['d','h','m','s'].map(u=>`<div class="unit"><b data-u="${u}">00</b><span>${{d:'Tage',h:'Stunden',m:'Minuten',s:'Sekunden'}[u]}</span></div>`).join('')}</div>
+    <div class="bar"><i id="heroBar"></i></div>
+    <div class="meta"><span>${fmtDate(new Date(next.at))}</span></div>`}
+  $('#grid').innerHTML=list.map((it,i)=>`<article class="card ${it.at<Date.now()?'past':''}" data-id="${it.id}" style="--d:${i*50}ms">
+    <div class="menu">
+      <button class="icon" title="Link kopieren" onclick="share('${it.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></button>
+      <button class="icon" title="Bearbeiten" onclick="openDlg('${it.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+      <button class="icon" title="Löschen" onclick="remove('${it.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>
+    <h3>${esc(it.name)}</h3><div class="date">${fmtDate(new Date(it.at))}</div>
+    <div class="big" data-big></div><div class="sub" data-sub></div>
+    <div class="bar"><i data-bar></i></div></article>`).join('');
+  tick(true);
+}
+
+let lastSec={};
+function tick(force){
+  const now=Date.now();
+  $('#now').textContent=new Date(now).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+  const hero=$('#hero');const hid=hero.dataset.id;const h=items.find(i=>i.id===hid);
+  if(h&&h.at>now){const p=parts(h.at-now);
+    hero.querySelectorAll('[data-u]').forEach(el=>{const v=pad(p[el.dataset.u]);if(el.textContent!==v||force){el.innerHTML=`<span class="flip">${v}</span>`}});
+    const bar=$('#heroBar');if(bar)bar.style.transform=`scaleX(${progress(h)})`;
+  }else if(h&&h.at<=now&&!hero.classList.contains('done')){render();return}
+  document.querySelectorAll('.card').forEach(c=>{const it=items.find(i=>i.id===c.dataset.id);if(!it)return;
+    const diff=it.at-now;const p=parts(Math.abs(diff));const big=c.querySelector('[data-big]'),sub=c.querySelector('[data-sub]');
+    if(diff>0){
+      if(p.d>0){big.innerHTML=`${p.d}<small>${p.d===1?'Tag':'Tage'}</small>`;sub.textContent=`${pad(p.h)}:${pad(p.m)}:${pad(p.s)} verbleibend`}
+      else{big.innerHTML=`${pad(p.h)}:${pad(p.m)}:${pad(p.s)}`;sub.textContent='Heute'}
+      c.classList.remove('past')
+    }else{big.innerHTML=`${p.d}<small>${p.d===1?'Tag':'Tage'}</small>`;sub.textContent=p.d===0?'Heute':'vorbei';if(!c.classList.contains('past'))c.classList.add('past')}
+    const bar=c.querySelector('[data-bar]');if(bar)bar.style.transform=`scaleX(${progress(it)})`;
+  });
+}
+setInterval(tick,1000);
+
+// Dialog
+const dlg=$('#dlg');let editing=null;
+function openDlg(id){editing=id||null;const it=items.find(i=>i.id===id);
+  $('#dlgTitle').textContent=it?'Countdown bearbeiten':'Neuer Countdown';
+  $('#fName').value=it?it.name:'';
+  const d=it?new Date(it.at):new Date(Date.now()+7*864e5);
+  $('#fDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  $('#fTime').value=it?`${pad(d.getHours())}:${pad(d.getMinutes())}`:'00:00';
+  dlg.showModal();setTimeout(()=>$('#fName').focus(),50)}
+$('#add').onclick=()=>openDlg();
+$('#cancel').onclick=()=>dlg.close();
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+$('#form').onsubmit=e=>{e.preventDefault();
+  const name=$('#fName').value.trim();const at=new Date($('#fDate').value+'T'+($('#fTime').value||'00:00')).getTime();
+  if(!name||!at)return;
+  if(editing){const it=items.find(i=>i.id===editing);it.name=name;it.at=at}else items.push({id:uid(),name,at,created:Date.now()});
+  persist();dlg.close();render();toast(editing?'Gespeichert':'Countdown angelegt')};
+// Quick picks
+const quick=[['Morgen',1],['In 1 Woche',7],['In 1 Monat',30],['In 100 Tagen',100],['Jahreswechsel','ny']];
+$('#quick').innerHTML=quick.map(([l,v])=>`<button type="button" class="chip" data-v="${v}">${l}</button>`).join('');
+$('#quick').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const v=b.dataset.v;let d=new Date();
+  if(v==='ny'){d=new Date(d.getFullYear()+1,0,1)}else{d.setDate(d.getDate()+ +v)}
+  $('#fDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;$('#fTime').value='00:00';
+  if(v==='ny'&&!$('#fName').value)$('#fName').value='Neues Jahr'};
+
+function remove(id){const it=items.find(i=>i.id===id);if(!confirm(`„${it.name}“ löschen?`))return;items=items.filter(i=>i.id!==id);persist();render();toast('Gelöscht')}
+function share(id){const it=items.find(i=>i.id===id);const url=`${location.origin}${location.pathname}?add=${encodeURIComponent(it.name)}|${it.at}`;
+  navigator.clipboard?.writeText(url).then(()=>toast('Link kopiert'),()=>prompt('Link:',url))}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1800)}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+document.title='Countdown';
+render();
+</script>
+</body>
+</html>
